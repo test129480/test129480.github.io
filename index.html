@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESL Cloze Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 16px;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        .difficulty-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 2px solid;
+        }
+        
+        .difficulty-easy {
+            background: #dcfce7;
+            color: #166534;
+            border-color: #86efac;
+        }
+        
+        .difficulty-medium {
+            background: #fef9c3;
+            color: #a16207;
+            border-color: #fde047;
+        }
+        
+        .difficulty-hard {
+            background: #fee2e2;
+            color: #991b1b;
+            border-color: #fca5a5;
+        }
+        
+        .question-box {
+            background: #f9fafb;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        
+        .question-text {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #1f2937;
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        
+        .option-btn {
+            padding: 16px;
+            border: 2px solid #d1d5db;
+            border-radius: 12px;
+            background: white;
+            font-size: 16px;
+            font-weight: 600;
+            color: #4b5563;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .option-btn:hover:not(:disabled) {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+        
+        .option-btn.selected {
+            background: #dbeafe;
+            border-color: #2563eb;
+            color: #1d4ed8;
+        }
+        
+        .option-btn.correct {
+            background: #dcfce7;
+            border-color: #22c55e;
+            color: #166534;
+        }
+        
+        .option-btn.incorrect {
+            background: #fee2e2;
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+        
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .submit-btn.active {
+            background: #2563eb;
+        }
+        
+        .submit-btn.active:hover {
+            background: #1d4ed8;
+        }
+        
+        .submit-btn.disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+        }
+        
+        .result-feedback {
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-align: center;
+            margin-top: 16px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .result-correct {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .result-incorrect {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .instructions {
+            text-align: center;
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 24px;
+            line-height: 1.5;
+        }
+        
+        .game-over {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 32px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .trophy {
+            font-size: 48px;
+            color: #f59e0b;
+            margin-bottom: 16px;
+        }
+        
+        .game-over h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 24px;
+        }
+        
+        .score {
+            font-size: 20px;
+            font-weight: 600;
+            color: #4b5563;
+            margin-bottom: 24px;
+        }
+        
+        .score-value {
+            color: #2563eb;
+            font-weight: 700;
+        }
+        
+        .rating-box {
+            background: #f9fafb;
+            border-radius: 16px;
+            padding: 24px;
+            margin: 24px 0;
+        }
+        
+        .book-icon {
+            font-size: 32px;
+            color: #2563eb;
+            margin-bottom: 12px;
+        }
+        
+        .rating-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+        
+        .rating-number {
+            font-size: 36px;
+            font-weight: 800;
+            color: #2563eb;
+            margin-bottom: 8px;
+        }
+        
+        .rating-message {
+            color: #6b7280;
+            font-size: 16px;
+        }
+        
+        .message {
+            color: #6b7280;
+            margin: 16px 0;
+            line-height: 1.5;
+        }
+        
+        .restart-btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 16px 24px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 auto;
+        }
+        
+        .restart-btn:hover {
+            background: #1d4ed8;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 16px;
+            }
+            
+            .options {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container" class="container">
+        <!-- Game content will be generated by JavaScript -->
+    </div>
+
+    <script>
+        // ESL Cloze Questions Data
+        const questions = {
+            easy: [
+                { sentence: "I ___ to school every day.", options: ["go", "went", "going", "gone"], correct: "go" },
+                { sentence: "She ___ a book right now.", options: ["read", "reads", "is reading", "reading"], correct: "is reading" },
+                { sentence: "They ___ in London last year.", options: ["live", "lived", "lives", "living"], correct: "lived" },
+                { sentence: "We ___ our homework every evening.", options: ["do", "does", "doing", "did"], correct: "do" },
+                { sentence: "He ___ to music after school.", options: ["listen", "listens", "listening", "listened"], correct: "listens" }
+            ],
+            medium: [
+                { sentence: "If I ___ more time, I would travel the world.", options: ["have", "had", "will have", "have had"], correct: "had" },
+                { sentence: "By the time we arrived, the movie ___ already started.", options: ["has", "had", "was", "is"], correct: "had" },
+                { sentence: "She speaks English ___ than her brother.", options: ["good", "better", "best", "well"], correct: "better" },
+                { sentence: "The cake was ___ delicious that I asked for seconds.", options: ["so", "such", "very", "too"], correct: "so" },
+                { sentence: "Neither John nor Mary ___ coming to the party.", options: ["is", "are", "am", "be"], correct: "is" }
+            ],
+            hard: [
+                { sentence: "Had I known about the meeting, I ___ attended.", options: ["would have", "will have", "have", "had"], correct: "would have" },
+                { sentence: "The project, ___ completion was delayed, cost more than expected.", options: ["whose", "which", "that", "whom"], correct: "whose" },
+                { sentence: "Not until the results were announced ___ realize the extent of the problem.", options: ["did I", "I did", "had I", "I had"], correct: "did I" },
+                { sentence: "The more you practice, ___ you become at speaking English.", options: ["the better", "better", "the best", "best"], correct: "the better" },
+                { sentence: "___ difficult the exam was, she passed with flying colors.", options: ["However", "Whatever", "Whenever", "Wherever"], correct: "However" }
+            ]
+        };
+
+        // Game state
+        let gameState = {
+            currentQuestion: null,
+            selectedAnswer: '',
+            showResult: false,
+            score: 0,
+            totalQuestions: 0,
+            difficulty: 'easy',
+            gameOver: false,
+            finalRating: 0
+        };
+
+        // DOM elements
+        const gameContainer = document.getElementById('game-container');
+
+        // Get random question
+        function getNewQuestion(difficulty) {
+            const availableQuestions = questions[difficulty];
+            const randomQuestion = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+            gameState.currentQuestion = randomQuestion;
+            gameState.selectedAnswer = '';
+            gameState.showResult = false;
+        }
+
+        // Handle answer selection
+        function handleAnswerSelect(answer) {
+            if (gameState.showResult) return;
+            gameState.selectedAnswer = answer;
+            renderGame();
+        }
+
+        // Handle submit
+        function handleSubmit() {
+            if (!gameState.selectedAnswer || gameState.showResult) return;
+            
+            gameState.showResult = true;
+            gameState.totalQuestions++;
+            
+            const isCorrect = gameState.selectedAnswer === gameState.currentQuestion.correct;
+            
+            if (isCorrect) {
+                gameState.score++;
+                // Keep or increase difficulty
+                if (gameState.difficulty === 'easy') {
+                    gameState.difficulty = 'medium';
+                } else if (gameState.difficulty === 'medium') {
+                    gameState.difficulty = 'hard';
+                }
+            } else {
+                // Decrease difficulty
+                if (gameState.difficulty === 'hard') {
+                    gameState.difficulty = 'medium';
+                } else if (gameState.difficulty === 'medium') {
+                    gameState.difficulty = 'easy';
+                }
+            }
+
+            renderGame();
+
+            // Auto proceed
+            setTimeout(() => {
+                if (gameState.totalQuestions >= 10) {
+                    // Calculate final rating
+                    const accuracy = gameState.score / 10;
+                    if (accuracy >= 0.8) {
+                        gameState.finalRating = 3;
+                    } else if (accuracy >= 0.6) {
+                        gameState.finalRating = 2;
+                    } else {
+                        gameState.finalRating = 1;
+                    }
+                    gameState.gameOver = true;
+                } else {
+                    getNewQuestion(gameState.difficulty);
+                }
+                renderGame();
+            }, 2000);
+        }
+
+        // Restart game
+        function restartGame() {
+            gameState = {
+                currentQuestion: null,
+                selectedAnswer: '',
+                showResult: false,
+                score: 0,
+                totalQuestions: 0,
+                difficulty: 'easy',
+                gameOver: false,
+                finalRating: 0
+            };
+            getNewQuestion('easy');
+            renderGame();
+        }
+
+        // Render game over screen
+        function renderGameOver() {
+            const accuracy = gameState.score / 10;
+            let message = "";
+            if (gameState.finalRating === 3) {
+                message = "Excellent! You're ready for advanced material.";
+            } else if (gameState.finalRating === 2) {
+                message = "Great job! You're at an intermediate level.";
+            } else {
+                message = "Good effort! You'll benefit from foundational practice.";
+            }
+
+            return `
+                <div class="game-over">
+                    <div class="trophy">🏆</div>
+                    <h2>Game Complete!</h2>
+                    <div class="score">
+                        Final Score: <span class="score-value">${gameState.score}/10</span>
+                    </div>
+                    <div class="rating-box">
+                        <div class="book-icon">📖</div>
+                        <div class="rating-title">Flashcard Deck Rating</div>
+                        <div class="rating-number">${gameState.finalRating}</div>
+                        <div class="rating-message">You will study flashcard deck ${gameState.finalRating} this week!</div>
+                    </div>
+                    <div class="message">${message}</div>
+                    <button class="restart-btn" id="restart-btn">
+                        <span>🔄</span> Play Again
+                    </button>
+                </div>
+            `;
+        }
+
+        // Render game screen
+        function renderGameScreen() {
+            if (!gameState.currentQuestion) return '';
+
+            // Build options HTML
+            let optionsHTML = '';
+            gameState.currentQuestion.options.forEach(option => {
+                let buttonClasses = 'option-btn';
+                
+                if (gameState.selectedAnswer === option) {
+                    if (gameState.showResult) {
+                        if (option === gameState.currentQuestion.correct) {
+                            buttonClasses += ' correct';
+                        } else {
+                            buttonClasses += ' incorrect';
+                        }
+                    } else {
+                        buttonClasses += ' selected';
+                    }
+                } else if (gameState.showResult && option === gameState.currentQuestion.correct) {
+                    buttonClasses += ' correct';
+                }
+
+                const disabled = gameState.showResult ? 'disabled' : '';
+                optionsHTML += `
+                    <button class="${buttonClasses}" onclick="handleAnswerSelect('${option}')" ${disabled}>
+                        ${option}
+                    </button>
+                `;
+            });
+
+            // Result feedback
+            let resultHTML = '';
+            if (gameState.showResult) {
+                const isCorrect = gameState.selectedAnswer === gameState.currentQuestion.correct;
+                resultHTML = `
+                    <div class="result-feedback ${isCorrect ? 'result-correct' : 'result-incorrect'}">
+                        ${isCorrect ? 
+                            'Correct! 🎉' : 
+                            `Wrong! The correct answer is: <strong>${gameState.currentQuestion.correct}</strong>`
+                        }
+                        ${gameState.totalQuestions < 10 ? 
+                            `<br><small>${isCorrect ? "Moving to a harder level!" : "Dropping to an easier level..."}</small>` : 
+                            ''
+                        }
+                    </div>
+                `;
+            }
+
+            // Submit button
+            let submitButtonHTML = '';
+            if (!gameState.showResult) {
+                const submitBtnClass = gameState.selectedAnswer ? 'submit-btn active' : 'submit-btn disabled';
+                submitButtonHTML = `
+                    <button class="${submitBtnClass}" onclick="handleSubmit()" ${!gameState.selectedAnswer ? 'disabled' : ''}>
+                        Submit Answer
+                    </button>
+                `;
+            }
+
+            // Difficulty badge
+            let difficultyClass = '';
+            let difficultyText = '';
+            if (gameState.difficulty === 'easy') {
+                difficultyClass = 'difficulty-easy';
+                difficultyText = '🧠 Easy';
+            } else if (gameState.difficulty === 'medium') {
+                difficultyClass = 'difficulty-medium';
+                difficultyText = '⚡ Medium';
+            } else {
+                difficultyClass = 'difficulty-hard';
+                difficultyText = '🏆 Hard';
+            }
+
+            return `
+                <div class="header">
+                    <h1>ESL Cloze Challenge</h1>
+                    <div class="stats">
+                        <span>Score: ${gameState.score}/${gameState.totalQuestions}</span>
+                        <div class="difficulty-badge ${difficultyClass}">${difficultyText}</div>
+                    </div>
+                </div>
+                <div class="question-box">
+                    <div class="question-text">${gameState.currentQuestion.sentence}</div>
+                </div>
+                <div class="options">
+                    ${optionsHTML}
+                </div>
+                ${submitButtonHTML}
+                ${resultHTML}
+                <div class="instructions">
+                    <p>Select the correct word to complete the sentence.</p>
+                    <p>Answer correctly to increase difficulty, incorrectly to decrease.</p>
+                </div>
+            `;
+        }
+
+        // Main render function
+        function renderGame() {
+            if (gameState.gameOver) {
+                gameContainer.innerHTML = renderGameOver();
+                document.getElementById('restart-btn').addEventListener('click', restartGame);
+            } else {
+                gameContainer.innerHTML = renderGameScreen();
+            }
+        }
+
+        // Initialize game
+        getNewQuestion('easy');
+        renderGame();
+    </script>
+</body>
+</html>
+
